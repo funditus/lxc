@@ -1,6 +1,8 @@
 LXC Debian Wheezy template
 ==========================
 
+It is a template to install Wheezy container on Wheezy host.
+
 Notes:
 
 1) You definitely need to change Debian mirror:
