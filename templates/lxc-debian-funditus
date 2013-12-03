@@ -96,9 +96,17 @@ EOF
 
     # ======= MY CONFIGURATION ================
 
-    # Set timezone as on host
-    cp /etc/localtime $rootfs/etc/localtime
-    cp /etc/timezone $rootfs/etc/timezone
+    # set initial timezone as on host
+    if [ -f /etc/timezone ]; then
+        cat /etc/timezone > $rootfs/etc/timezone
+        chroot $rootfs dpkg-reconfigure -f noninteractive tzdata
+    elif [ -f /etc/sysconfig/clock ]; then
+        source /etc/sysconfig/clock
+        echo $ZONE > $rootfs/etc/timezone
+        chroot $rootfs dpkg-reconfigure -f noninteractive tzdata
+    else
+        echo "Timezone in container is not configured. Adjust it manually."
+    fi
 
     # Avoid annoying error '/etc/init.d/mountall.sh: 59: kill: Illegal number: 3 1' message during boot (http://lists.debian.org/debian-hurd/2013/08/msg00050.html)
     sed -i 's/PID="\$(pidof \/sbin\/init || echo 1)"/PID="\$(pidof -s \/sbin\/init || echo 1)"/' $rootfs/etc/init.d/mountall.sh
